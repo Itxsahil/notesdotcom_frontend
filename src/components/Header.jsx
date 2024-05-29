@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { logOutApi } from '../Api/api';
 
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -24,7 +25,7 @@ const Header = () => {
 
     const handleLogout = async () => {
         try {
-            await axios.post('http://localhost:4040/api/v1/users/logout', {}, {
+            await axios.post(logOutApi, {}, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('accessToken')}`
                 }
