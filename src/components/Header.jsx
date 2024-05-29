@@ -1,22 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
-        // Check if access token exists in cookie or local storage
-        const accessToken = localStorage.getItem('accessToken'); // Adjust accordingly if you're using cookies
-        if (accessToken) {
-            setIsLoggedIn(true);
-        } else {
-            setIsLoggedIn(false);
-        }
+        // Check if access token exists in local storage
+        const accessToken = localStorage.getItem('accessToken');
+        setIsLoggedIn(!!accessToken);
     }, []);
 
+    useEffect(() => {
+        if (isMenuOpen) {
+            setIsMenuOpen(false);
+        }
+    }, [isLoggedIn]);
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
+    };
+
+    const handleLogout = async () => {
+        try {
+            await axios.post('http://localhost:4040/api/v1/users/logout', {}, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('accessToken')}`
+                }
+            });
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            setIsLoggedIn(false);
+            setIsMenuOpen(false); // Close the menu
+            window.location.reload();
+            navigate('/login');
+        } catch (error) {
+            console.error('Error logging out:', error);
+        }
     };
 
     return (
@@ -27,62 +48,82 @@ const Header = () => {
                 </div>
                 <ul className="hidden md:flex space-x-4">
                     <li>
-                        <NavLink to="/" 
-                        className={({isActive}) =>
-                            `block py-2 pr-4 pl-3 duration-200 ${isActive ? "text-orange-700":"text-white"} border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-orange-700 lg:p-0`
-                        }>
+                        <NavLink
+                            to="/"
+                            className={({ isActive }) =>
+                                `block py-2 pr-4 pl-3 duration-200 ${isActive ? "text-orange-700" : "text-white"} border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-orange-700 lg:p-0`
+                            }
+                        >
                             Home
                         </NavLink>
                     </li>
                     <li>
-                        <NavLink to="/about" 
-                        className={({isActive}) =>
-                            `block py-2 pr-4 pl-3 duration-200 ${isActive ? "text-orange-700":"text-white"} border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-orange-700 lg:p-0`
-                        }>
+                        <NavLink
+                            to="/about"
+                            className={({ isActive }) =>
+                                `block py-2 pr-4 pl-3 duration-200 ${isActive ? "text-orange-700" : "text-white"} border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-orange-700 lg:p-0`
+                            }
+                        >
                             About
                         </NavLink>
                     </li>
                     <li>
-                        <NavLink to="/upload-notes" 
-                        className={({isActive}) =>
-                            `block py-2 pr-4 pl-3 duration-200 ${isActive ? "text-orange-700":"text-white"} border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-orange-700 lg:p-0`
-                        }>
+                        <NavLink
+                            to="/upload-notes"
+                            className={({ isActive }) =>
+                                `block py-2 pr-4 pl-3 duration-200 ${isActive ? "text-orange-700" : "text-white"} border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-orange-700 lg:p-0`
+                            }
+                        >
                             Upload Notes
                         </NavLink>
                     </li>
                     <li>
-                        <NavLink to="/get-notes" 
-                        className={({isActive}) =>
-                            `block py-2 pr-4 pl-3 duration-200 ${isActive ? "text-orange-700":"text-white"} border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-orange-700 lg:p-0`
-                        }>
+                        <NavLink
+                            to="/get-notes"
+                            className={({ isActive }) =>
+                                `block py-2 pr-4 pl-3 duration-200 ${isActive ? "text-orange-700" : "text-white"} border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-orange-700 lg:p-0`
+                            }
+                        >
                             Get Notes
                         </NavLink>
                     </li>
-                    {/* Conditionally render based on authentication */}
-                    {!isLoggedIn && (
+                    {!isLoggedIn ? (
                         <>
                             <li>
-                                <NavLink to="/login" 
-                                className={({isActive}) =>
-                                    `block py-2 pr-4 pl-3 duration-200 ${isActive ? "text-orange-700":"text-white"} border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-orange-700 lg:p-0`
-                                }>
+                                <NavLink
+                                    to="/login"
+                                    className={({ isActive }) =>
+                                        `block py-2 pr-4 pl-3 duration-200 ${isActive ? "text-orange-700" : "text-white"} border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-orange-700 lg:p-0`
+                                    }
+                                >
                                     Login
                                 </NavLink>
                             </li>
                             <li>
-                                <NavLink to="/signup" 
-                                className={({isActive}) =>
-                                    `block py-2 pr-4 pl-3 duration-200 ${isActive ? "text-orange-700":"text-white"} border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-orange-700 lg:p-0`
-                                }>
+                                <NavLink
+                                    to="/signup"
+                                    className={({ isActive }) =>
+                                        `block py-2 pr-4 pl-3 duration-200 ${isActive ? "text-orange-700" : "text-white"} border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-orange-700 lg:p-0`
+                                    }
+                                >
                                     Sign Up
                                 </NavLink>
                             </li>
                         </>
+                    ) : (
+                        <li>
+                            <button
+                                onClick={handleLogout}
+                                className="block py-2 pr-4 pl-3 text-white border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-orange-700 lg:p-0"
+                            >
+                                Logout
+                            </button>
+                        </li>
                     )}
                 </ul>
                 <div className="md:hidden">
-                    <button onClick={toggleMenu} 
-                    className="text-white focus:outline-none">
+                    <button onClick={toggleMenu}
+                        className="text-white focus:outline-none">
                         <svg
                             className="w-6 h-6"
                             fill="none"
@@ -104,57 +145,83 @@ const Header = () => {
                 <div className="md:hidden">
                     <ul className="flex flex-col space-y-4 mt-4">
                         <li>
-                            <NavLink to="/" 
-                            className={({isActive}) =>
-                                `block py-2 pr-4 pl-3 duration-200 ${isActive ? "text-orange-700":"text-white"} border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-orange-700 lg:p-0`
-                            } onClick={toggleMenu}>
+                            <NavLink
+                                to="/"
+                                className={({ isActive }) =>
+                                    `block py-2 pr-4 pl-3 duration-200 ${isActive ? "text-orange-700" : "text-white"} border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-orange-700 lg:p-0`
+                                }
+                                onClick={toggleMenu}
+                            >
                                 Home
                             </NavLink>
                         </li>
                         <li>
-                            <NavLink to="/about" 
-                            className={({isActive}) =>
-                                `block py-2 pr-4 pl-3 duration-200 ${isActive ? "text-orange-700":"text-white"} border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-orange-700 lg:p-0`
-                            } onClick={toggleMenu}>
+                            <NavLink
+                                to="/about"
+                                className={({ isActive }) =>
+                                    `block py-2 pr-4 pl-3 duration-200 ${isActive ? "text-orange-700" : "text-white"} border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-orange-700 lg:p-0`
+                                }
+                                onClick={toggleMenu}
+                            >
                                 About
                             </NavLink>
                         </li>
                         <li>
-                            <NavLink to="/upload-notes" 
-                            className={({isActive}) =>
-                                `block py-2 pr-4 pl-3 duration-200 ${isActive ? "text-orange-700":"text-white"} border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-orange-700 lg:p-0`
-                            } onClick={toggleMenu}>
+                            <NavLink
+                                to="/upload-notes"
+                                className={({ isActive }) =>
+                                    `block py-2 pr-4 pl-3 duration-200 ${isActive ? "text-orange-700" : "text-white"} border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-orange-700 lg:p-0`
+                                }
+                                onClick={toggleMenu}
+                            >
                                 Upload Notes
                             </NavLink>
                         </li>
                         <li>
-                            <NavLink to="/get-notes" 
-                            className={({isActive}) =>
-                                `block py-2 pr-4 pl-3 duration-200 ${isActive ? "text-orange-700":"text-white"} border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-orange-700 lg:p-0`
-                            } onClick={toggleMenu}>
+                            <NavLink
+                                to="/get-notes"
+                                className={({ isActive }) =>
+                                    `block py-2 pr-4 pl-3 duration-200 ${isActive ? "text-orange-700" : "text-white"} border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-orange-700 lg:p-0`
+                                }
+                                onClick={toggleMenu}
+                            >
                                 Get Notes
                             </NavLink>
                         </li>
-                        {/* Conditionally render based on authentication */}
-                        {!isLoggedIn && (
+                        {!isLoggedIn ? (
                             <>
                                 <li>
-                                    <NavLink to="/login" 
-                                    className={({isActive}) =>
-                                        `block py-2 pr-4 pl-3 duration-200 ${isActive ? "text-orange-700":"text-white"} border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-orange-700 lg:p-0`
-                                    } onClick={toggleMenu}>
+                                    <NavLink
+                                        to="/login"
+                                        className={({ isActive }) =>
+                                            `block py-2 pr-4 pl-3 duration-200 ${isActive ? "text-orange-700" : "text-white"} border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-orange-700 lg:p-0`
+                                        }
+                                        onClick={toggleMenu}
+                                    >
                                         Login
                                     </NavLink>
                                 </li>
                                 <li>
-                                    <NavLink to="/signup" 
-                                    className={({isActive}) =>
-                                        `block py-2 pr-4 pl-3 duration-200 ${isActive ? "text-orange-700":"text-white"} border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-orange-700 lg:p-0`
-                                    } onClick={toggleMenu}>
+                                    <NavLink
+                                        to="/signup"
+                                        className={({ isActive }) =>
+                                            `block py-2 pr-4 pl-3 duration-200 ${isActive ? "text-orange-700" : "text-white"} border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-orange-700 lg:p-0`
+                                        }
+                                        onClick={toggleMenu}
+                                    >
                                         Sign Up
                                     </NavLink>
                                 </li>
                             </>
+                        ) : (
+                            <li>
+                                <button
+                                    onClick={handleLogout}
+                                    className="block py-2 pr-4 pl-3 text-white border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-orange-700 lg:p-0"
+                                >
+                                    Logout
+                                </button>
+                            </li>
                         )}
                     </ul>
                 </div>

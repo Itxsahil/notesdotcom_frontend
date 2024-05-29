@@ -1,7 +1,8 @@
-// src/pages/Signup.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { signInApi } from '../Api/api';
 
 const Signup = () => {
     const [formData, setFormData] = useState({
@@ -12,7 +13,7 @@ const Signup = () => {
 
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -35,24 +36,39 @@ const Signup = () => {
             return;
         }
 
+        setLoading(true);
         try {
-            const response = await axios.post('http://localhost:4040/api/v1/users/register', formData);
+            const response = await axios.post(signInApi, formData);
             console.log(response)
             if (response.status === 201) {
                 setSuccess('Registration successful!');
                 setError('');
                 setFormData({ username: '', password: '', email: '' });
-                navigate('/',{replace:true}); // Redirect to the home page immediately
+                setLoading(false);
+                navigate('/', { replace: true }); // Redirect to the home page immediately
             }
         } catch (error) {
-            setError('Registration failed. Please try again.');
+            setLoading(false);
+            if (error.response && error.response.data && error.response.data.message) {
+                setError(error.response.data.message);
+            } else {
+                setError('Registration failed. Please try again.');
+            }
             setSuccess('');
         }
     };
 
     return (
-        <div className="flex justify-center items-center h-screen bg-gray-100">
-            <div className="bg-white p-8 rounded shadow-md w-80">
+        <motion.div 
+            initial={{ opacity: 0, y: -50 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            transition={{ duration: 0.5 }}
+            className="flex justify-center items-center h-screen bg-gray-100">
+            <motion.div 
+                initial={{ opacity: 0, scale: 0.8 }} 
+                animate={{ opacity: 1, scale: 1 }} 
+                transition={{ delay: 0.5, duration: 0.5 }}
+                className="bg-white p-8 rounded shadow-md w-80">
                 <h1 className="text-2xl font-bold mb-6 text-center">Sign Up</h1>
                 {error && <p className="text-red-500 mb-4">{error}</p>}
                 {success && <p className="text-green-500 mb-4">{success}</p>}
@@ -95,13 +111,14 @@ const Signup = () => {
                     </div>
                     <button
                         type="submit"
-                        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                        className={`w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        disabled={loading}
                     >
-                        Sign Up
+                        {loading ? 'Signing Up...' : 'Sign Up'}
                     </button>
                 </form>
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
     );
 };
 

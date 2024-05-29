@@ -1,7 +1,8 @@
-// src/pages/UploadNotes.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
-
+import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { uploadNoteApi } from '../Api/api';
 const UploadNotes = () => {
     const [formData, setFormData] = useState({
         branch: '',
@@ -11,7 +12,7 @@ const UploadNotes = () => {
         module: '',
         file: null
     });
-
+    const navigate = useNavigate();
     const handleChange = (e) => {
         setFormData({
             ...formData,
@@ -35,16 +36,21 @@ const UploadNotes = () => {
         formDataToSend.append('title', formData.title);
         formDataToSend.append('module', formData.module);
         formDataToSend.append('file', formData.file);
-
+        const accessToken = localStorage.getItem('accessToken');
+        if (!accessToken) {
+            setError('No authorization token found. Please log in.');
+            return;
+        }
         try {
-            const response = await axios.post('http://localhost:4040/api/v1/notes/upload', formDataToSend, {
+            const response = await axios.post(uploadNoteApi, formDataToSend, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
-                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                    'Authorization': `Bearer ${accessToken}`
                 }
             });
             console.log(response.data); // Assuming the server returns the uploaded note data
             // Reset form after successful upload if needed
+            navigate('/get-notes')
         } catch (error) {
             console.error(error);
             // Handle error
@@ -52,10 +58,20 @@ const UploadNotes = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 flex flex-col justify-center items-center">
-            <div className="bg-white p-8 rounded shadow-md max-w-md w-full">
+        <motion.div 
+            initial={{ opacity: 0, y: -50 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            transition={{ duration: 0.5 }}
+            className="min-h-screen bg-gray-100 flex flex-col justify-center items-center">
+            <motion.div 
+                initial={{ opacity: 0, scale: 0.8 }} 
+                animate={{ opacity: 1, scale: 1 }} 
+                transition={{ delay: 0.5, duration: 0.5 }}
+                className="bg-white p-8 rounded shadow-md max-w-md w-full">
                 <h1 className="text-2xl font-bold mb-6 text-center">Upload Notes</h1>
                 <form onSubmit={handleSubmit}>
+                    {/* Form Inputs */}
+                    {/* Branch */}
                     <div className="mb-4">
                         <label htmlFor="branch" className="block text-sm font-medium text-gray-700 mb-1">Branch</label>
                         <select
@@ -74,8 +90,9 @@ const UploadNotes = () => {
                             <option value="civil">Civil</option>
                         </select>
                     </div>
+                    {/* Semester */}
                     <div className="mb-4">
-                        <label htmlFor="branch" className="block text-sm font-medium text-gray-700 mb-1">sem</label>
+                        <label htmlFor="sem" className="block text-sm font-medium text-gray-700 mb-1">Semester</label>
                         <select
                             id="sem"
                             name="sem"
@@ -84,19 +101,15 @@ const UploadNotes = () => {
                             className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                             required
                         >
-                            <option value="">Select semester</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                            <option value="6">6</option>
-                            <option value="7">7</option>
-                            <option value="8">8</option>
+                            <option value="">Select Semester</option>
+                            {[1, 2, 3, 4, 5, 6, 7, 8].map((semester) => (
+                                <option key={semester} value={semester}>{semester}</option>
+                            ))}
                         </select>
                     </div>
+                    {/* Module */}
                     <div className="mb-4">
-                        <label htmlFor="branch" className="block text-sm font-medium text-gray-700 mb-1">module</label>
+                        <label htmlFor="module" className="block text-sm font-medium text-gray-700 mb-1">Module</label>
                         <select
                             id="module"
                             name="module"
@@ -105,16 +118,13 @@ const UploadNotes = () => {
                             className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                             required
                         >
-                            <option value="">Select module</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                            <option value="6">6</option>
+                            <option value="">Select Module</option>
+                            {[1, 2, 3, 4, 5, 6, 7, 8].map((module) => (
+                                <option key={module} value={module}>{module}</option>
+                            ))}
                         </select>
                     </div>
-                    {/* Similar dropdowns for sem, module */}
+                    {/* Subject */}
                     <div className="mb-4">
                         <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
                         <input
@@ -124,11 +134,13 @@ const UploadNotes = () => {
                             value={formData.subject}
                             onChange={handleChange}
                             className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                            required placeholder='in lowercase'
+                            required
+                            placeholder="Subject should be in lowercase"
                         />
                     </div>
+                    {/* Title */}
                     <div className="mb-4">
-                        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">title</label>
+                        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">Title</label>
                         <input
                             type="text"
                             id="title"
@@ -136,11 +148,13 @@ const UploadNotes = () => {
                             value={formData.title}
                             onChange={handleChange}
                             className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                            required placeholder='title will be the name of the file'
+                            required
+                            placeholder="Title will be the name of the file"
                         />
                     </div>
+                    {/* File Upload */}
                     <div className="mb-4">
-                        <label htmlFor="file" className="block text-sm font-medium text-gray-700 mb-1">file</label>
+                        <label htmlFor="file" className="block text-sm font-medium text-gray-700 mb-1">File</label>
                         <input
                             type="file"
                             id="file"
@@ -150,8 +164,7 @@ const UploadNotes = () => {
                             required
                         />
                     </div>
-
-                    {/* Similar inputs for title, file upload */}
+                    {/* Submit Button */}
                     <button
                         type="submit"
                         className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
@@ -159,9 +172,8 @@ const UploadNotes = () => {
                         Upload
                     </button>
                 </form>
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
     );
 };
-
 export default UploadNotes;

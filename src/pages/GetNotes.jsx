@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { getNotesApi }from "../Api/api"
 
 const GetNotes = () => {
     const [formData, setFormData] = useState({
@@ -32,7 +33,7 @@ const GetNotes = () => {
     const fetchNotes = async (pageNumber) => {
         setIsLoading(true);
         try {
-            const response = await axios.get('http://localhost:4040/api/v1/notes/getNotes', {
+            const response = await axios.get(getNotesApi, {
                 params: {
                     branch: formData.branch,
                     sem: formData.sem,
@@ -51,9 +52,9 @@ const GetNotes = () => {
             setIsLoading(false);
         }
     };
-useEffect(()=>{
-    fetchNotes()
-},[])
+    useEffect(() => {
+        fetchNotes()
+    }, [])
 
     const loadMoreNotes = () => {
         if (page < totalPages) {
@@ -95,49 +96,49 @@ useEffect(()=>{
                     </div>
                     {/* Semester */}
                     <div className="w-full md:w-1/2 px-2 mb-4 md:mb-0">
-                            <label htmlFor="sem" className="block text-sm font-medium text-gray-700 mb-1">Semester</label>
-                            <select
-                                id="sem"
-                                name="sem"
-                                value={formData.sem}
-                                onChange={handleChange}
-                                className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                            >
-                                <option value="">Select Semester</option>
-                                {[1, 2, 3, 4, 5, 6, 7, 8].map((semester) => (
-                                    <option key={semester} value={semester}>{semester}</option>
-                                ))}
-                            </select>
-                        </div>
-                        {/* Subject */}
-                        <div className="w-full md:w-1/2 px-2 mb-4 md:mb-0">
-                            <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
-                            <input
-                                type="text"
-                                id="subject"
-                                name="subject"
-                                value={formData.subject}
-                                onChange={handleChange}
-                                className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                placeholder="Subject should be in lowercase"
-                            />
-                        </div>
-                        {/* Module */}
-                        <div className="w-full md:w-1/2 px-2 mb-4 md:mb-0">
-                            <label htmlFor="module" className="block text-sm font-medium text-gray-700 mb-1">Module</label>
-                            <select
-                                id="module"
-                                name="module"
-                                value={formData.module}
-                                onChange={handleChange}
-                                className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                            >
-                                <option value="">Select Module</option>
-                                {[1, 2, 3, 4, 5, 6, 7, 8].map((module) => (
-                                    <option key={module} value={module}>{module}</option>
-                                ))}
-                            </select>
-                        </div>
+                        <label htmlFor="sem" className="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+                        <select
+                            id="sem"
+                            name="sem"
+                            value={formData.sem}
+                            onChange={handleChange}
+                            className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        >
+                            <option value="">Select Semester</option>
+                            {[1, 2, 3, 4, 5, 6, 7, 8].map((semester) => (
+                                <option key={semester} value={semester}>{semester}</option>
+                            ))}
+                        </select>
+                    </div>
+                    {/* Subject */}
+                    <div className="w-full md:w-1/2 px-2 mb-4 md:mb-0">
+                        <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                        <input
+                            type="text"
+                            id="subject"
+                            name="subject"
+                            value={formData.subject}
+                            onChange={handleChange}
+                            className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            placeholder="Subject should be in lowercase"
+                        />
+                    </div>
+                    {/* Module */}
+                    <div className="w-full md:w-1/2 px-2 mb-4 md:mb-0">
+                        <label htmlFor="module" className="block text-sm font-medium text-gray-700 mb-1">Module</label>
+                        <select
+                            id="module"
+                            name="module"
+                            value={formData.module}
+                            onChange={handleChange}
+                            className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        >
+                            <option value="">Select Module</option>
+                            {[1, 2, 3, 4, 5, 6, 7, 8].map((module) => (
+                                <option key={module} value={module}>{module}</option>
+                            ))}
+                        </select>
+                    </div>
                     {/* Add other filter inputs similarly */}
                     {/* Submit Button */}
                     <button
@@ -160,7 +161,7 @@ useEffect(()=>{
                 </div>
                 {/* Display Notes */}
                 {/* Your notes display logic here */}
-                </div>
+            </div>
             {/* Display Notes */}
             <div className="container mx-auto mt-8">
                 <h2 className="text-xl font-semibold mb-4">Notes Found:</h2>
@@ -170,7 +171,8 @@ useEffect(()=>{
                             <span className="text-gray-800">{note.title}</span>
                             <button
                                 onClick={() => handleDownload(note.file)}
-                                className="text-blue-600 underline hover:text-blue-800 ml-4"
+                                className="text-blue-600 hover:text-blue-800 ml-4 focus:outline-none"
+                                style={{ textDecoration: 'none' }} // Add this style
                             >
                                 Download
                             </button>
@@ -190,7 +192,7 @@ useEffect(()=>{
                         <p>Loading...</p>
                     </div>
                 )}
-            
+
             </div>
         </div>
     );
