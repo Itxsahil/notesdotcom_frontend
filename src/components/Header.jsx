@@ -34,8 +34,9 @@ const Header = () => {
             localStorage.removeItem('refreshToken');
             setIsLoggedIn(false);
             setIsMenuOpen(false); // Close the menu
-            window.location.reload();
             navigate('/login');
+            // window.location.reload();
+            
         } catch (error) {
             console.error('Error logging out:', error);
         }
