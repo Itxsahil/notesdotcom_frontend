@@ -45,7 +45,7 @@ const Signup = () => {
                 setError('');
                 setFormData({ username: '', password: '', email: '' });
                 setLoading(false);
-                navigate('/', { replace: true }); // Redirect to the home page immediately
+                navigate('/login', { replace: true }); // Redirect to the home page immediately
             }
         } catch (error) {
             setLoading(false);
